@@ -11,6 +11,7 @@ public class IndexWriter {
       try (var out = new FileWriter("mkdocs.yml")) {
          out.write("site_name: \"" + String.join(".", sg.Packages.get().getName()) + "\"\n");
          out.write("docs_dir: \"docs\"\n");
+         out.write("use_directory_urls: false\n");
          out.write("theme:\n" + "  name: mkdocs\n" + "  color_mode: dark\n");
 
          out.write("nav:\n");
