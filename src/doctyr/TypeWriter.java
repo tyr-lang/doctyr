@@ -23,9 +23,22 @@ public class TypeWriter {
 		try (var out = new FileWriter(f)) {
 			writeTags(t, out);
 
-			out.write("#description of type " + name(t) + "\n more text");
+			out.write("#description of type " + name(t) + "\n more text\n");
+
+			writeMembers(t, out);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void writeMembers(TypeDef t, FileWriter out) throws IOException {
+		if (t.getMembers().isEmpty())
+			return;
+
+		out.write("\n# Members\n");
+
+		for (var m : t.getMembers()) {
+			out.write(String.format("## %s %s\n", Pretty.visit(m.getVisibility()), m.getName()));
 		}
 	}
 
