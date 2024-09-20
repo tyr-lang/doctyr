@@ -26,6 +26,7 @@ plugins:
       tags_file: tags.md
   - offline
   - privacy
+  - search
 theme:
   name: material
 """);
