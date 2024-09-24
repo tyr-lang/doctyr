@@ -2,6 +2,9 @@ package doctyr;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import tyr.tooling.sdk.ast.OGFile;
 
@@ -12,6 +15,13 @@ public class IndexWriter {
 		// that regard)
 		try (var out = new FileWriter("docs/tags.md")) {
 			// empty file
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		// copy logo
+		try {
+			Files.copy(Paths.get("logo.png"), Paths.get("docs", "logo.png"), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -29,6 +39,23 @@ plugins:
   - search
 theme:
   name: material
+  logo: logo.png
+  favicon: logo.png
+  palette:
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: amber
+      accent: yellow
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
 """);
 
 			out.write("nav:\n");
