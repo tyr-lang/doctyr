@@ -1,28 +1,40 @@
 package doctyr;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 
-import ogss.common.java.api.Mode;
 import ogss.common.java.api.OGSSException;
-import tyr.tooling.sdk.ast.OGFile;
 
 public class Main {
-   public static void main(String[] args) throws OGSSException, IOException {
-      try (var sg = OGFile.open("test/tyr.lang.aast.sg", Mode.Read, Mode.ReadOnly)) {
-         new PackageWriter(sg);
-         new TypeWriter(sg);
-         new IndexWriter(sg);
-         runMKDocs();
-      }
-   }
+	public static void main(String[] args) throws OGSSException, IOException {
+		var out = new File("out");
+		delete(out);
+		out.mkdirs();
 
-   private static void runMKDocs() throws IOException {
-      var pb = new ProcessBuilder("mkdocs", "build").inheritIO();
-      var p = pb.start();
-      try {
-         p.waitFor();
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-   }
+		var tmp = Files.createTempDirectory("doctyr").toFile();
+
+		try (var s = new State("test/tyr.lang.aast.sg", tmp, out)) {
+			s.prepare();
+			s.generate();
+		} finally {
+			delete(tmp);
+		}
+	}
+
+	private static void delete(File f) throws IOException {
+		if (!f.exists())
+			return;
+
+		if (f.isFile()) {
+			f.delete();
+			return;
+		}
+
+		try (var walk = Files.walk(f.toPath())) {
+			walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		}
+	}
 }
