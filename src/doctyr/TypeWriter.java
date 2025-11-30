@@ -29,6 +29,10 @@ public class TypeWriter {
 
          writeComment(t.getDoc(), out);
 
+         out.write("\n## Parents\n\n");
+         out.write(DiagramMaker.superTypes(t));
+         out.write("\n");
+
          writeMembers(t, out);
       } catch (IOException e) {
          e.printStackTrace();

@@ -19,7 +19,7 @@ public class IndexWriter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		// color scheme
 		{
 			var f = new File("docs/stylesheets/extra.css");
@@ -195,7 +195,7 @@ public class IndexWriter {
 				e.printStackTrace();
 			}
 		}
-		
+
 		// copy logo
 		try {
 			Files.copy(Paths.get("logo.png"), Paths.get("docs", "logo.png"), StandardCopyOption.REPLACE_EXISTING);
@@ -218,6 +218,11 @@ extra_css:
   - stylesheets/extra.css
 markdown_extensions:
   - admonition
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 theme:
   name: material
   logo: logo.png
@@ -231,7 +236,7 @@ theme:
     # Palette toggle for light mode
     - scheme: tyr
       toggle:
-        icon: material/brightness-7 
+        icon: material/brightness-7
         name: Switch to dark mode
 """);
 
@@ -243,7 +248,7 @@ theme:
 				out.write("    - \"" + TypeWriter.name(t) + "\": \"" + TypeWriter.docFileRelativeName(t) + "\"\n");
 
 			out.write("  - Tags: tags.md\n");
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
