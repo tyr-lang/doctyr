@@ -4,67 +4,112 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import tyr.tooling.sdk.ast.DocComment;
 import tyr.tooling.sdk.ast.OGFile;
 import tyr.tooling.sdk.ast.PublicVisible;
+import tyr.tooling.sdk.ast.Test;
 import tyr.tooling.sdk.ast.TypeDef;
 
 public class TypeWriter {
 
-	public static final File base = new File("docs", "types");
+   public static final File base = new File("docs", "types");
 
-	public TypeWriter(OGFile sg) {
-		for (var t : sg.TypeDefs)
-			write(t);
-	}
+   public TypeWriter(OGFile sg) {
+      for (var t : sg.TypeDefs)
+         write(t);
+   }
 
-	private void write(TypeDef t) {
-		var f = docFile(t);
-		f.getParentFile().mkdirs();
-		try (var out = new FileWriter(f)) {
-			writeTags(t, out);
+   private void write(TypeDef t) {
+      var f = docFile(t);
+      f.getParentFile().mkdirs();
+      try (var out = new FileWriter(f)) {
+         writeTags(t, out);
 
-			out.write("#description of type " + name(t) + "\n more text\n");
+         out.write("# " + name(t) + "\n\n");
 
-			writeMembers(t, out);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+         writeComment(t.getDoc(), out);
 
-	private void writeMembers(TypeDef t, FileWriter out) throws IOException {
-		if (t.getMembers().isEmpty())
-			return;
+         writeMembers(t, out);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
 
-		out.write("\n# Members\n");
+   private void writeMembers(TypeDef t, FileWriter out) throws IOException {
+      if (t.getMembers().isEmpty())
+         return;
 
-		for (var m : t.getMembers()) {
-			out.write(String.format("## %s %s\n", Pretty.visit(m.getVisibility()), m.getName()));
-		}
-	}
+      for (var m : t.getMembers()) {
+         if (m instanceof Test)
+            continue;
 
-	private void writeTags(TypeDef t, FileWriter out) throws IOException {
-		out.write("---\n");
-		out.write("tags:\n");
+         out.write(String.format("## %s %s\n\n", Pretty.visit(m.getVisibility()), m.getName()));
+         writeComment(m.getDoc(), out);
+      }
+   }
 
-		if (t instanceof TypeDef)
-			out.write("  - type\n");
+   private void writeComment(DocComment doc, FileWriter out) throws IOException {
+      if (null == doc) {
+         out.write("(undocumented entity)\n\n");
+         return;
+      }
 
-		if (t.getVisibility() instanceof PublicVisible)
-			out.write("  - public\n");
+      for (var p : doc.getDetails()) {
+         out.write(String.join(" ", p.getWords()));
+         out.write("\n\n");
+      }
 
-		out.write("---\n");
-	}
+      for (var t : doc.getTags()) {
+         if (null != t.getWords() && !t.getWords().isEmpty()) {
+            var words = String.join(" ", t.getWords());
+            out.write(String.format("!!! %s \"%s %s\"\n\n", boxKind(t.getName()), t.getName(), words));
+         } else {
+            out.write(String.format("!!! %s \"%s\"\n\n", boxKind(t.getName()), t.getName()));
+         }
+         for (var p : t.getContent()) {
+            out.write("    " + String.join(" ", p.getWords()) + "\n");
+         }
+         out.write("\n");
+      }
+   }
 
-	public static File docFile(TypeDef t) {
-		return new File(base, t.ID() + ".md");
-	}
+   private String boxKind(String tag) {
+      return switch (tag) {
+      case "note" -> "note";
+      case "author" -> "abstract";
 
-	public static String docFileRelativeName(TypeDef t) {
-		return docFile(t).toString().substring(5);
-	}
+      case "pre" -> "question";
+      case "post", "inv" -> "success";
 
-	public static String name(TypeDef t) {
-		return t.getName();
-	}
+      case "todo", "bug" -> "bug";
+
+      default -> "info";
+      };
+   }
+
+   private void writeTags(TypeDef t, FileWriter out) throws IOException {
+      out.write("---\n");
+      out.write("tags:\n");
+
+      if (t instanceof TypeDef)
+         out.write("  - type\n");
+
+      if (t.getVisibility() instanceof PublicVisible)
+         out.write("  - public\n");
+
+      out.write("---\n");
+   }
+
+   public static File docFile(TypeDef t) {
+      return new File(base, t.ID() + ".md");
+   }
+
+   public static String docFileRelativeName(TypeDef t) {
+      return docFile(t).toString().substring(5);
+   }
+
+   public static String name(TypeDef t) {
+      return t.getName();
+   }
 
 }
