@@ -1,6 +1,9 @@
+.cache/
 *.md
 *.html
 site/
+docs/
+mkdocs.yml
 
 # Compiled class file
 *.class
