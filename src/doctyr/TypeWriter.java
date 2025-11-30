@@ -81,9 +81,12 @@ public class TypeWriter {
       case "pre" -> "question";
       case "post", "inv" -> "success";
 
+      case "param" -> "info";
+      case "return" -> "tip";
+
       case "todo", "bug" -> "bug";
 
-      default -> "info";
+      default -> "quote";
       };
    }
 
